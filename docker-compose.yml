@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    build: ./eureka-server
+    container_name: subtrack-eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - subtrack-network
+
+  user-service:
+    build: ./user-service
+    container_name: subtrack-user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - subtrack-network
+
+  payment-service:
+    build: ./payment-service
+    container_name: subtrack-payment-service
+    ports:
+      - "8083:8083"
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - subtrack-network
+
+  subscription-service:
+    build: ./subscription-service
+    container_name: subtrack-subscription-service
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - payment-service
+    networks:
+      - subtrack-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: subtrack-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - user-service
+      - subscription-service
+      - payment-service
+    networks:
+      - subtrack-network
+
+networks:
+  subtrack-network:
+    driver: bridge

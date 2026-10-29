@@ -1,0 +1,43 @@
+# ==========================================
+# SubTrack .gitignore
+# ==========================================
+
+# 1. Eclipse / STS Metadata & Launch Configurations
+.metadata/
+*.launch
+.settings/
+.project
+.classpath
+.mylyn/
+
+# 2. IntelliJ IDEA & VS Code
+.idea/
+*.iml
+.vscode/
+
+# 3. Maven Build Outputs & JARs
+**/target/
+*.jar
+*.war
+*.class
+
+# 4. Frontend Node Modules & Dist
+frontend/node_modules/
+**/node_modules/
+frontend/dist/
+dist/
+.eslintcache
+
+# 5. Runtime Logs & OS Files
+logs/
+*.log
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# 6. Local Environment & Backups
+.env
+.env.local
+*.env
+.checkpoint_v1/
