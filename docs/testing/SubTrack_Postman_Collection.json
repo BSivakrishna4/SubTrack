@@ -1,0 +1,1744 @@
+{
+  "info": {
+    "_postman_id": "7d983e20-3b91-4c12-9844-3c66f570ab42",
+    "name": "SubTrack Microservices API Collection",
+    "description": "Official Review 2 API Collection for SubTrack (Subscription Lifecycle & Recurring Revenue Management System).\n\nArchitectural Entry Point: Spring Cloud API Gateway (Default: http://localhost:8080).\n\nFolders:\n1. User Authentication\n2. Plan Catalog\n3. Admin Plan Management\n4. Subscription Lifecycle\n5. Payment History\n6. Security and Error Handling",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. User Authentication",
+      "description": "Registration, login, JWT issuance, profile lookup, and token validation via User Service (routed through API Gateway).",
+      "item": [
+        {
+          "name": "1.1 Register Standard User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"User object returned with ID and role USER\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"id\");",
+                  "    pm.expect(jsonData.email).to.eql(pm.environment.get(\"user_email\"));",
+                  "    pm.expect(jsonData.role).to.eql(\"USER\");",
+                  "});",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"user_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{user_name}}\",\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\",\n  \"role\": \"USER\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/users/register",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "register"
+              ]
+            },
+            "description": "Creates a new regular subscriber account. Passwords are encrypted using BCrypt."
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 Register Admin User (Unique Placeholder)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created or 409 Conflict if rerun\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.test(\"Admin user registered with role ADMIN\", function () {",
+                  "        pm.expect(jsonData.role).to.eql(\"ADMIN\");",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{admin_name}}\",\n  \"email\": \"{{admin_register_email}}\",\n  \"password\": \"{{admin_password}}\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/users/register",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "register"
+              ]
+            },
+            "description": "Registers a secondary administrative user using a distinct placeholder email (newadmin@subtrack.com). The pre-seeded default administrator (admin@subtrack.com / admin123) is used for direct login in request 1.6. Note: If rerun on a persistent database where newadmin@subtrack.com already exists, the server returns 409 Conflict."
+          },
+          "response": []
+        },
+        {
+          "name": "1.3 Register User - Duplicate Email (Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 409 Conflict\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{user_name}}\",\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\",\n  \"role\": \"USER\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/users/register",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "register"
+              ]
+            },
+            "description": "Negative test: attempting to register with an already existing email returns 409 Conflict."
+          },
+          "response": []
+        },
+        {
+          "name": "1.4 Register User - Invalid Request Body (Validation Error)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"email\": \"not-an-email\",\n  \"password\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/users/register",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "register"
+              ]
+            },
+            "description": "Negative test: sends invalid parameters triggering Bean Validation (@NotBlank, @Email) error 400."
+          },
+          "response": []
+        },
+        {
+          "name": "1.5 Login Standard User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns valid JWT token and userId\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"token\");",
+                  "    pm.expect(jsonData.token).to.be.a(\"string\");",
+                  "    pm.expect(jsonData).to.have.property(\"userId\");",
+                  "});",
+                  "if (jsonData.token) {",
+                  "    pm.environment.set(\"jwt_token\", jsonData.token);",
+                  "}",
+                  "if (jsonData.userId) {",
+                  "    pm.environment.set(\"user_id\", jsonData.userId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/users/login",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Authenticates regular user credentials and captures jwt_token and user_id environment variables."
+          },
+          "response": []
+        },
+        {
+          "name": "1.6 Login Admin User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns valid admin JWT token with role ADMIN\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"token\");",
+                  "    pm.expect(jsonData.role).to.eql(\"ADMIN\");",
+                  "});",
+                  "if (jsonData.token) {",
+                  "    pm.environment.set(\"admin_jwt_token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/users/login",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Authenticates admin credentials and captures admin_jwt_token for privileged administrative operations."
+          },
+          "response": []
+        },
+        {
+          "name": "1.7 Login - Invalid Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"WrongPassword999!\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/users/login",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Negative test: incorrect password triggers BCrypt mismatch and returns 401 Unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "1.8 Validate JWT Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Token is verified valid\", function () {",
+                  "    pm.expect(jsonData.valid).to.be.true;",
+                  "    pm.expect(jsonData).to.have.property(\"userId\");",
+                  "    pm.expect(jsonData).to.have.property(\"email\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/users/validate",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "validate"
+              ]
+            },
+            "description": "Verifies the current JWT token validity and extracts token claims."
+          },
+          "response": []
+        },
+        {
+          "name": "1.9 Get Current User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns profile for authenticated user\", function () {",
+                  "    pm.expect(jsonData.id.toString()).to.eql(pm.environment.get(\"user_id\").toString());",
+                  "    pm.expect(jsonData.email).to.eql(pm.environment.get(\"user_email\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/users/{{user_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Retrieves the authenticated user's own profile through the API Gateway."
+          },
+          "response": []
+        },
+        {
+          "name": "1.10 Get All Registered Users (Admin Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns array of registered users\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/users",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "[ADMIN REQUIRED] Fetches the list of all registered users in the platform."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Plan Catalog",
+      "description": "Public plan browsing for anonymous guests and subscribers via Subscription Service.",
+      "item": [
+        {
+          "name": "2.1 View Active Plans (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns list of active plans\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.length).to.be.at.least(1);",
+                  "});",
+                  "if (jsonData.length > 0 && jsonData[0].id) {",
+                  "    pm.environment.set(\"plan_id\", jsonData[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/plans",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "plans"
+              ]
+            },
+            "description": "Anonymous visitors and prospective customers can browse all active subscription tiers without authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "2.2 Get Plan By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Plan matches requested ID\", function () {",
+                  "    pm.expect(jsonData.id.toString()).to.eql(pm.environment.get(\"plan_id\").toString());",
+                  "    pm.expect(jsonData).to.have.property(\"price\");",
+                  "    pm.expect(jsonData).to.have.property(\"durationDays\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/plans/{{plan_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "{{plan_id}}"
+              ]
+            },
+            "description": "Fetches specific plan details by unique plan ID."
+          },
+          "response": []
+        },
+        {
+          "name": "2.3 Get Plan By Nonexistent ID (404 Not Found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/plans/999999",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "999999"
+              ]
+            },
+            "description": "Negative test: requesting a nonexistent plan ID returns 404 Not Found."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Admin Plan Management",
+      "description": "Administrative CRUD operations on subscription plans. All endpoints require role ADMIN.",
+      "item": [
+        {
+          "name": "3.1 Create Subscription Plan (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Created plan returned with ID\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"id\");",
+                  "    pm.expect(jsonData.name).to.eql(\"Enterprise Annual Plus\");",
+                  "});",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"admin_plan_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Enterprise Annual Plus\",\n  \"description\": \"Full suite tier with priority enterprise billing support\",\n  \"price\": 999,\n  \"durationDays\": 365,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/plans",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "plans"
+              ]
+            },
+            "description": "[ADMIN REQUIRED] Creates a new subscription plan in the catalog."
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 View All Plans Including Inactive (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns all plans list\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/plans/all",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "all"
+              ]
+            },
+            "description": "[ADMIN REQUIRED] Retrieves all subscription plans including archived or inactive ones."
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 Update Subscription Plan (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Updated plan reflects new price\", function () {",
+                  "    pm.expect(jsonData.price).to.eql(1199.00);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Enterprise Annual Plus Updated\",\n  \"description\": \"Full suite tier with priority enterprise billing support updated\",\n  \"price\": 1199,\n  \"durationDays\": 365,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/plans/{{admin_plan_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "{{admin_plan_id}}"
+              ]
+            },
+            "description": "[ADMIN REQUIRED] Modifies properties of an existing plan."
+          },
+          "response": []
+        },
+        {
+          "name": "3.4 Delete Subscription Plan (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204 No Content\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/plans/{{admin_plan_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "{{admin_plan_id}}"
+              ]
+            },
+            "description": "[ADMIN REQUIRED] Removes a plan from the catalog."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Subscription Lifecycle",
+      "description": "Full subscription state management: Activation, User Listing, Renewal, Cancellation, and Admin Overview.",
+      "item": [
+        {
+          "name": "4.1 Activate Subscription (Successful Payment)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Subscription is ACTIVE with computed dates and lastPayment\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"ACTIVE\");",
+                  "    pm.expect(jsonData).to.have.property(\"startDate\");",
+                  "    pm.expect(jsonData).to.have.property(\"expiryDate\");",
+                  "    pm.expect(jsonData).to.have.property(\"lastPayment\");",
+                  "    pm.expect(jsonData.lastPayment.status).to.eql(\"SUCCESS\");",
+                  "});",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"subscription_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{user_id}},\n  \"planId\": {{plan_id}},\n  \"simulatePaymentFailure\": false\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/activate",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "activate"
+              ]
+            },
+            "description": "Activates a subscription tier for the authenticated user, invoking OpenFeign payment processing."
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 Activate Subscription (Payment Failure Simulation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 402 Payment Required\", function () {",
+                  "    pm.response.to.have.status(402);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{user_id}},\n  \"planId\": {{plan_id}},\n  \"simulatePaymentFailure\": true\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/activate",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "activate"
+              ]
+            },
+            "description": "Simulates payment failure: Payment Service returns FAILED, aborting activation with 402 Payment Required."
+          },
+          "response": []
+        },
+        {
+          "name": "4.3 Get Subscriptions By User ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns subscriptions belonging to user\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/user/{{user_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "user",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Retrieves all subscription instances associated with the authenticated user ID."
+          },
+          "response": []
+        },
+        {
+          "name": "4.4 Get Subscription By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Subscription ID matches requested ID\", function () {",
+                  "    pm.expect(jsonData.id.toString()).to.eql(pm.environment.get(\"subscription_id\").toString());",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/{{subscription_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "{{subscription_id}}"
+              ]
+            },
+            "description": "Fetches details of a specific subscription."
+          },
+          "response": []
+        },
+        {
+          "name": "4.5 Renew Subscription (Successful Payment)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Subscription renewed with ACTIVE status and extended expiry\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"ACTIVE\");",
+                  "    pm.expect(jsonData).to.have.property(\"expiryDate\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"simulatePaymentFailure\": false\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/{{subscription_id}}/renew",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "{{subscription_id}}",
+                "renew"
+              ]
+            },
+            "description": "Extends subscription expiry date by plan duration upon successful mock payment."
+          },
+          "response": []
+        },
+        {
+          "name": "4.6 Renew Subscription (Payment Failure Simulation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 402 Payment Required\", function () {",
+                  "    pm.response.to.have.status(402);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"simulatePaymentFailure\": true\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/{{subscription_id}}/renew",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "{{subscription_id}}",
+                "renew"
+              ]
+            },
+            "description": "Simulates failure during renewal: rejected with 402 Payment Required without extending duration."
+          },
+          "response": []
+        },
+        {
+          "name": "4.7 Cancel Subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Subscription status changed to CANCELLED\", function () {",
+                  "    pm.expect(jsonData.status).to.eql(\"CANCELLED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/{{subscription_id}}/cancel",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "{{subscription_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Transitions subscription state to CANCELLED."
+          },
+          "response": []
+        },
+        {
+          "name": "4.8 Get All Subscriptions (Admin Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns array of all platform subscriptions\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/all",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "all"
+              ]
+            },
+            "description": "[ADMIN REQUIRED] Administrative overview of all subscriptions across all users in the system."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Payment History",
+      "description": "Transaction records and payment logs via Payment Service.",
+      "item": [
+        {
+          "name": "5.1 Get User Payment History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns payment history array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "if (Array.isArray(jsonData) && jsonData.length > 0 && jsonData[0] && jsonData[0].paymentId) {",
+                  "    pm.environment.set(\"payment_id\", jsonData[0].paymentId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/payments/user/{{user_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "user",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Fetches mock payment transaction logs for the authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "5.2 Get Payment By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Payment record contains transactionReference\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"transactionReference\");",
+                  "    pm.expect(jsonData).to.have.property(\"status\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/payments/{{payment_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "{{payment_id}}"
+              ]
+            },
+            "description": "Retrieves details of an individual payment transaction by payment ID."
+          },
+          "response": []
+        },
+        {
+          "name": "5.3 Get All Payment Transactions (Admin Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Returns array of all platform payment records\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/payments/all",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "all"
+              ]
+            },
+            "description": "[ADMIN REQUIRED] Administrator overview of all transactions across all users."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Security and Error Handling",
+      "description": "Negative security tests: missing/invalid/expired tokens, IDOR/BOLA user data isolation, non-admin role barriers, and blocked internal endpoints.",
+      "item": [
+        {
+          "name": "6.1 Missing JWT on Protected Route",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/user/{{user_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "user",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Missing Authorization header on protected route is rejected by API Gateway with 401 Unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "6.2 Invalid / Malformed JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid.malformed.token.signature"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/user/{{user_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "user",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Tampered or invalid JWT signature rejected by API Gateway with 401 Unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "6.3 Expired / Invalid-Signature JWT Token (Signature Rejection Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized (Rejected at Gateway signature/claims check)\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{expired_jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/user/{{user_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "user",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Tests Gateway rejection of a token with an expired payload but mock signature. Note: Without exposing the private JWT signing secret in the test environment, client-fabricated tokens fail cryptographic signature validation (SignatureException) at the Gateway before claims expiration is evaluated. Both failure modes return 401 Unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "6.4 Direct External Call to Payment Processor (Blocked)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"subscriptionId\": 1,\n  \"amount\": 199\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/payments/process",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "process"
+              ]
+            },
+            "description": "Direct external access to POST /api/payments/process is blocked at API Gateway with 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "6.5 Non-Admin Access to Admin Route (Plans All)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/plans/all",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "all"
+              ]
+            },
+            "description": "Standard user (role USER) attempting to access admin route /api/plans/all is rejected with 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "6.6 Non-Admin Access to Admin Route (All Users)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/users",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Standard user (role USER) attempting to access /api/users is rejected with 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "6.7 BOLA / IDOR: User Accessing Another User's Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/users/999999",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "999999"
+              ]
+            },
+            "description": "Identity Isolation: User A attempting to inspect profile of User 999999 is blocked with 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "6.8 BOLA / IDOR: User Accessing Another User's Subscriptions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/user/999999",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "user",
+                "999999"
+              ]
+            },
+            "description": "Identity Isolation: User A attempting to view subscriptions belonging to another user ID is rejected with 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "6.9 BOLA / IDOR: User Accessing Another User's Payment History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 Forbidden\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/payments/user/999999",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "user",
+                "999999"
+              ]
+            },
+            "description": "Identity Isolation: User A attempting to view payment records belonging to another user is rejected with 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "6.10 Nonexistent Subscription ID (404 Not Found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/999999",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "999999"
+              ]
+            },
+            "description": "Negative test: looking up a nonexistent subscription ID returns 404 Not Found."
+          },
+          "response": []
+        },
+        {
+          "name": "6.11 Invalid Request Body - Missing Plan ID on Activation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{user_id}},\n  \"simulatePaymentFailure\": false\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/subscriptions/activate",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "activate"
+              ]
+            },
+            "description": "Negative test: activating a subscription with missing mandatory planId triggers @NotNull validation error (400 Bad Request)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

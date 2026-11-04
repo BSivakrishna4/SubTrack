@@ -14,14 +14,31 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import jakarta.annotation.PostConstruct;
+
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:SubTrackSecretKeyForJWTSecurityAuthenticationSignatureVerification2026SecureKey!}")
+    @Value("${jwt.secret:}")
     private String secret;
 
     @Value("${jwt.expiration:86400000}")
     private long expiration;
+
+    @PostConstruct
+    public void validateSecret() {
+        if (secret == null || secret.trim().isEmpty() || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("FATAL: JWT_SECRET environment variable is missing, empty, or shorter than 32 bytes (256 bits). Service startup aborted for security.");
+        }
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public void setExpiration(long expiration) {
+        this.expiration = expiration;
+    }
 
     private Key getSigningKey() {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);

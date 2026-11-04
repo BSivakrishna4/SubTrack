@@ -37,7 +37,9 @@ export default function Dashboard() {
     fetchDashboardData();
   }, [user]);
 
-  const activeSub = subscriptions.find(s => s.status === 'ACTIVE');
+  // Pick the latest active subscription if multiple exist
+  const activeSubs = subscriptions.filter(s => s.status === 'ACTIVE');
+  const activeSub = activeSubs.length > 0 ? activeSubs[activeSubs.length - 1] : null;
 
   const handleRenew = async (subId) => {
     if (!window.confirm('Are you sure you want to process mock payment to renew this subscription?')) return;
@@ -115,18 +117,21 @@ export default function Dashboard() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                   <Package size={24} style={{ color: 'var(--accent-cyan)' }} />
                   <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-heading)' }}>
-                    {activeSub.plan?.name}
+                    {activeSub.plan?.name || 'Active Subscription Plan'}
                   </h2>
                   <StatusBadge status={activeSub.status} />
                 </div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  {activeSub.plan?.description}
+                  {activeSub.plan?.description || 'Active subscription tier'}
                 </p>
               </div>
 
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-heading)' }}>
-                  ₹{activeSub.plan?.price} <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 400 }}>/ {activeSub.plan?.durationDays} days</span>
+                  {activeSub.plan?.price != null ? `₹${activeSub.plan.price}` : ''}{' '}
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 400 }}>
+                    {activeSub.plan?.durationDays ? `/ ${activeSub.plan.durationDays} days` : ''}
+                  </span>
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--accent-cyan)', fontWeight: 600, marginTop: '2px' }}>
                   Microservices Sub ID: #{activeSub.id}

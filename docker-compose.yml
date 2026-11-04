@@ -12,10 +12,14 @@ services:
   user-service:
     build: ./user-service
     container_name: subtrack-user-service
-    ports:
-      - "8081:8081"
+    # Keep service ports internal to Docker network; do not publish to host
+    expose:
+      - "8081"
     environment:
       - EUREKA_URI=http://eureka-server:8761/eureka/
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+      - INTERNAL_GATEWAY_TOKEN=${INTERNAL_GATEWAY_TOKEN}
     depends_on:
       - eureka-server
     networks:
@@ -24,10 +28,13 @@ services:
   payment-service:
     build: ./payment-service
     container_name: subtrack-payment-service
-    ports:
-      - "8083:8083"
+    # Keep service ports internal to Docker network; do not publish to host
+    expose:
+      - "8083"
     environment:
       - EUREKA_URI=http://eureka-server:8761/eureka/
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+      - INTERNAL_GATEWAY_TOKEN=${INTERNAL_GATEWAY_TOKEN}
     depends_on:
       - eureka-server
     networks:
@@ -36,10 +43,13 @@ services:
   subscription-service:
     build: ./subscription-service
     container_name: subtrack-subscription-service
-    ports:
-      - "8082:8082"
+    # Keep service ports internal to Docker network; do not publish to host
+    expose:
+      - "8082"
     environment:
       - EUREKA_URI=http://eureka-server:8761/eureka/
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+      - INTERNAL_GATEWAY_TOKEN=${INTERNAL_GATEWAY_TOKEN}
     depends_on:
       - eureka-server
       - payment-service
@@ -49,10 +59,13 @@ services:
   api-gateway:
     build: ./api-gateway
     container_name: subtrack-api-gateway
+    # Only API Gateway is published externally to host
     ports:
       - "8080:8080"
     environment:
       - EUREKA_URI=http://eureka-server:8761/eureka/
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_GATEWAY_TOKEN=${INTERNAL_GATEWAY_TOKEN}
     depends_on:
       - eureka-server
       - user-service

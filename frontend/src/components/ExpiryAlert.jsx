@@ -9,7 +9,7 @@ export default function ExpiryAlert({ expiryDate }) {
   const diffTime = expiry - now;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays <= 5 && diffDays > 0) {
+  if (diffDays <= 7 && diffDays > 0) {
     return (
       <div
         className="alert alert-warning"

@@ -1,0 +1,696 @@
+{
+  "timestamp": "2026-10-29T17:17:42.607Z",
+  "summary": {
+    "totalRequests": 39,
+    "totalTests": 59,
+    "passedTests": 57,
+    "failedTests": 2
+  },
+  "results": [
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.1 Register Standard User",
+      "method": "POST",
+      "url": "http://localhost:8080/api/users/register",
+      "status": 409,
+      "responseTime": 1484,
+      "tests": [
+        {
+          "name": "Status code is 201 Created",
+          "passed": false,
+          "error": "Expected status 201, but received 409"
+        },
+        {
+          "name": "User object returned with ID and role USER",
+          "passed": false,
+          "error": "Expected object to have property 'id', but had keys: error, message, timestamp, status"
+        }
+      ],
+      "passed": false
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.2 Register Admin User (Unique Placeholder)",
+      "method": "POST",
+      "url": "http://localhost:8080/api/users/register",
+      "status": 409,
+      "responseTime": 46,
+      "tests": [
+        {
+          "name": "Status code is 201 Created or 409 Conflict if rerun",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.3 Register User - Duplicate Email (Conflict)",
+      "method": "POST",
+      "url": "http://localhost:8080/api/users/register",
+      "status": 409,
+      "responseTime": 63,
+      "tests": [
+        {
+          "name": "Status code is 409 Conflict",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.4 Register User - Invalid Request Body (Validation Error)",
+      "method": "POST",
+      "url": "http://localhost:8080/api/users/register",
+      "status": 400,
+      "responseTime": 29,
+      "tests": [
+        {
+          "name": "Status code is 400 Bad Request",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.5 Login Standard User",
+      "method": "POST",
+      "url": "http://localhost:8080/api/users/login",
+      "status": 200,
+      "responseTime": 249,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns valid JWT token and userId",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.6 Login Admin User",
+      "method": "POST",
+      "url": "http://localhost:8080/api/users/login",
+      "status": 200,
+      "responseTime": 229,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns valid admin JWT token with role ADMIN",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.7 Login - Invalid Password",
+      "method": "POST",
+      "url": "http://localhost:8080/api/users/login",
+      "status": 401,
+      "responseTime": 229,
+      "tests": [
+        {
+          "name": "Status code is 401 Unauthorized",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.8 Validate JWT Token",
+      "method": "GET",
+      "url": "http://localhost:8080/api/users/validate",
+      "status": 200,
+      "responseTime": 49,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Token is verified valid",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.9 Get Current User Profile",
+      "method": "GET",
+      "url": "http://localhost:8080/api/users/10",
+      "status": 200,
+      "responseTime": 38,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns profile for authenticated user",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "1. User Authentication",
+      "requestName": "1.10 Get All Registered Users (Admin Only)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/users",
+      "status": 200,
+      "responseTime": 54,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns array of registered users",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "2. Plan Catalog",
+      "requestName": "2.1 View Active Plans (Public)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/plans",
+      "status": 200,
+      "responseTime": 36,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns list of active plans",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "2. Plan Catalog",
+      "requestName": "2.2 Get Plan By ID",
+      "method": "GET",
+      "url": "http://localhost:8080/api/plans/1",
+      "status": 200,
+      "responseTime": 36,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Plan matches requested ID",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "2. Plan Catalog",
+      "requestName": "2.3 Get Plan By Nonexistent ID (404 Not Found)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/plans/999999",
+      "status": 404,
+      "responseTime": 56,
+      "tests": [
+        {
+          "name": "Status code is 404 Not Found",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "3. Admin Plan Management",
+      "requestName": "3.1 Create Subscription Plan (Admin)",
+      "method": "POST",
+      "url": "http://localhost:8080/api/plans",
+      "status": 201,
+      "responseTime": 59,
+      "tests": [
+        {
+          "name": "Status code is 201 Created",
+          "passed": true
+        },
+        {
+          "name": "Created plan returned with ID",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "3. Admin Plan Management",
+      "requestName": "3.2 View All Plans Including Inactive (Admin)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/plans/all",
+      "status": 200,
+      "responseTime": 41,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns all plans list",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "3. Admin Plan Management",
+      "requestName": "3.3 Update Subscription Plan (Admin)",
+      "method": "PUT",
+      "url": "http://localhost:8080/api/plans/7",
+      "status": 200,
+      "responseTime": 56,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Updated plan reflects new price",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "3. Admin Plan Management",
+      "requestName": "3.4 Delete Subscription Plan (Admin)",
+      "method": "DELETE",
+      "url": "http://localhost:8080/api/plans/7",
+      "status": 204,
+      "responseTime": 43,
+      "tests": [
+        {
+          "name": "Status code is 204 No Content",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "4. Subscription Lifecycle",
+      "requestName": "4.1 Activate Subscription (Successful Payment)",
+      "method": "POST",
+      "url": "http://localhost:8080/api/subscriptions/activate",
+      "status": 201,
+      "responseTime": 96,
+      "tests": [
+        {
+          "name": "Status code is 201 Created",
+          "passed": true
+        },
+        {
+          "name": "Subscription is ACTIVE with computed dates and lastPayment",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "4. Subscription Lifecycle",
+      "requestName": "4.2 Activate Subscription (Payment Failure Simulation)",
+      "method": "POST",
+      "url": "http://localhost:8080/api/subscriptions/activate",
+      "status": 402,
+      "responseTime": 99,
+      "tests": [
+        {
+          "name": "Status code is 402 Payment Required",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "4. Subscription Lifecycle",
+      "requestName": "4.3 Get Subscriptions By User ID",
+      "method": "GET",
+      "url": "http://localhost:8080/api/subscriptions/user/10",
+      "status": 200,
+      "responseTime": 66,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns subscriptions belonging to user",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "4. Subscription Lifecycle",
+      "requestName": "4.4 Get Subscription By ID",
+      "method": "GET",
+      "url": "http://localhost:8080/api/subscriptions/9",
+      "status": 200,
+      "responseTime": 42,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Subscription ID matches requested ID",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "4. Subscription Lifecycle",
+      "requestName": "4.5 Renew Subscription (Successful Payment)",
+      "method": "PUT",
+      "url": "http://localhost:8080/api/subscriptions/9/renew",
+      "status": 200,
+      "responseTime": 115,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Subscription renewed with ACTIVE status and extended expiry",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "4. Subscription Lifecycle",
+      "requestName": "4.6 Renew Subscription (Payment Failure Simulation)",
+      "method": "PUT",
+      "url": "http://localhost:8080/api/subscriptions/9/renew",
+      "status": 402,
+      "responseTime": 88,
+      "tests": [
+        {
+          "name": "Status code is 402 Payment Required",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "4. Subscription Lifecycle",
+      "requestName": "4.7 Cancel Subscription",
+      "method": "PUT",
+      "url": "http://localhost:8080/api/subscriptions/9/cancel",
+      "status": 200,
+      "responseTime": 80,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Subscription status changed to CANCELLED",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "4. Subscription Lifecycle",
+      "requestName": "4.8 Get All Subscriptions (Admin Only)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/subscriptions/all",
+      "status": 200,
+      "responseTime": 86,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns array of all platform subscriptions",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "5. Payment History",
+      "requestName": "5.1 Get User Payment History",
+      "method": "GET",
+      "url": "http://localhost:8080/api/payments/user/10",
+      "status": 200,
+      "responseTime": 53,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns payment history array",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "5. Payment History",
+      "requestName": "5.2 Get Payment By ID",
+      "method": "GET",
+      "url": "http://localhost:8080/api/payments/7",
+      "status": 200,
+      "responseTime": 42,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Payment record contains transactionReference",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "5. Payment History",
+      "requestName": "5.3 Get All Payment Transactions (Admin Only)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/payments/all",
+      "status": 200,
+      "responseTime": 54,
+      "tests": [
+        {
+          "name": "Status code is 200 OK",
+          "passed": true
+        },
+        {
+          "name": "Returns array of all platform payment records",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.1 Missing JWT on Protected Route",
+      "method": "GET",
+      "url": "http://localhost:8080/api/subscriptions/user/10",
+      "status": 401,
+      "responseTime": 8,
+      "tests": [
+        {
+          "name": "Status code is 401 Unauthorized",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.2 Invalid / Malformed JWT",
+      "method": "GET",
+      "url": "http://localhost:8080/api/subscriptions/user/10",
+      "status": 401,
+      "responseTime": 11,
+      "tests": [
+        {
+          "name": "Status code is 401 Unauthorized",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.3 Expired / Invalid-Signature JWT Token (Signature Rejection Test)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/subscriptions/user/10",
+      "status": 401,
+      "responseTime": 17,
+      "tests": [
+        {
+          "name": "Status code is 401 Unauthorized (Rejected at Gateway signature/claims check)",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.4 Direct External Call to Payment Processor (Blocked)",
+      "method": "POST",
+      "url": "http://localhost:8080/api/payments/process",
+      "status": 403,
+      "responseTime": 10,
+      "tests": [
+        {
+          "name": "Status code is 403 Forbidden",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.5 Non-Admin Access to Admin Route (Plans All)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/plans/all",
+      "status": 403,
+      "responseTime": 14,
+      "tests": [
+        {
+          "name": "Status code is 403 Forbidden",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.6 Non-Admin Access to Admin Route (All Users)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/users",
+      "status": 403,
+      "responseTime": 15,
+      "tests": [
+        {
+          "name": "Status code is 403 Forbidden",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.7 BOLA / IDOR: User Accessing Another User's Profile",
+      "method": "GET",
+      "url": "http://localhost:8080/api/users/999999",
+      "status": 403,
+      "responseTime": 50,
+      "tests": [
+        {
+          "name": "Status code is 403 Forbidden",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.8 BOLA / IDOR: User Accessing Another User's Subscriptions",
+      "method": "GET",
+      "url": "http://localhost:8080/api/subscriptions/user/999999",
+      "status": 403,
+      "responseTime": 26,
+      "tests": [
+        {
+          "name": "Status code is 403 Forbidden",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.9 BOLA / IDOR: User Accessing Another User's Payment History",
+      "method": "GET",
+      "url": "http://localhost:8080/api/payments/user/999999",
+      "status": 403,
+      "responseTime": 27,
+      "tests": [
+        {
+          "name": "Status code is 403 Forbidden",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.10 Nonexistent Subscription ID (404 Not Found)",
+      "method": "GET",
+      "url": "http://localhost:8080/api/subscriptions/999999",
+      "status": 404,
+      "responseTime": 31,
+      "tests": [
+        {
+          "name": "Status code is 404 Not Found",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "folder": "6. Security and Error Handling",
+      "requestName": "6.11 Invalid Request Body - Missing Plan ID on Activation",
+      "method": "POST",
+      "url": "http://localhost:8080/api/subscriptions/activate",
+      "status": 400,
+      "responseTime": 24,
+      "tests": [
+        {
+          "name": "Status code is 400 Bad Request",
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "finalEnvironment": {
+    "gateway_url": "http://localhost:8080",
+    "user_name": "SubTrack Test User",
+    "user_email": "testuser@subtrack.com",
+    "user_password": "TestPass123!",
+    "admin_name": "SubTrack Administrator",
+    "admin_email": "admin@subtrack.com",
+    "admin_register_email": "newadmin@subtrack.com",
+    "admin_password": "admin123",
+    "jwt_token": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInVzZXJJZCI6MTAsImVtYWlsIjoidGVzdHVzZXJAc3VidHJhY2suY29tIiwic3ViIjoidGVzdHVzZXJAc3VidHJhY2suY29tIiwiaWF0IjoxNzkzMjk0MjYwLCJleHAiOjE3OTMzODA2NjB9.iaheCQeTJunPfYCBQbg-gRoECvq7-KBbxdtdHcueUrs",
+    "admin_jwt_token": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJ1c2VySWQiOjMsImVtYWlsIjoiYWRtaW5Ac3VidHJhY2suY29tIiwic3ViIjoiYWRtaW5Ac3VidHJhY2suY29tIiwiaWF0IjoxNzkzMjk0MjYwLCJleHAiOjE3OTMzODA2NjB9.8iWvZ0dBfFTT-Mo5t-SJdF0gHWYZ3VhKam6Q1wMpeFc",
+    "expired_jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJleHBpcmVkQHN1YnRyYWNrLmNvbSIsInVzZXJJZCI6OTk5LCJyb2xlIjoiVVNFUiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxNjAwMDAwMDAxfQ.mockExpiredTokenSignatureForTestingOnly",
+    "user_id": 10,
+    "plan_id": 1,
+    "admin_plan_id": 7,
+    "subscription_id": 9,
+    "payment_id": 7
+  }
+}

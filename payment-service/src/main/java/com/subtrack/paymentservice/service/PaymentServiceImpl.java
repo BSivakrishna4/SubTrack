@@ -59,7 +59,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentResponse getPaymentById(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment record not found with ID: " + paymentId));
+                .orElseThrow(() -> new com.subtrack.paymentservice.exception.ResourceNotFoundException("Payment record not found with ID: " + paymentId));
         return mapToResponse(payment);
     }
 

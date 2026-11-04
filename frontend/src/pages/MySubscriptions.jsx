@@ -167,8 +167,12 @@ export default function MySubscriptions() {
                         {userMap[s.userId] || `User #${s.userId}`}
                       </td>
                     )}
-                    <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-heading)' }}>{s.plan?.name}</td>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--text-heading)' }}>₹{s.plan?.price}</td>
+                    <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-heading)' }}>
+                      {s.plan?.name || 'Archived Plan'}
+                    </td>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--text-heading)' }}>
+                      {s.plan?.price != null ? `₹${s.plan.price}` : '—'}
+                    </td>
                     <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{new Date(s.startDate).toLocaleDateString()}</td>
                     <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{new Date(s.expiryDate).toLocaleDateString()}</td>
                     <td style={{ padding: '10px 14px' }}>

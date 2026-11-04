@@ -30,5 +30,9 @@ eureka:
     ip-address: ${EUREKA_INSTANCE_IP:127.0.0.1}
 
 jwt:
-  secret: ${JWT_SECRET:SubTrackSecretKeyForJWTSecurityAuthenticationSignatureVerification2026SecureKey!}
+  secret: ${JWT_SECRET:}
   expiration: 86400000 # 24 hours in milliseconds
+
+internal:
+  service-secret: ${INTERNAL_SERVICE_SECRET:}
+  gateway-token: ${INTERNAL_GATEWAY_TOKEN:}

@@ -28,3 +28,7 @@ eureka:
   instance:
     prefer-ip-address: true
     ip-address: ${EUREKA_INSTANCE_IP:127.0.0.1}
+
+internal:
+  service-secret: ${INTERNAL_SERVICE_SECRET:}
+  gateway-token: ${INTERNAL_GATEWAY_TOKEN:}

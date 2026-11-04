@@ -58,6 +58,12 @@ eureka:
     prefer-ip-address: true
     ip-address: ${EUREKA_INSTANCE_IP:127.0.0.1}
 
+jwt:
+  secret: ${JWT_SECRET:}
+
+internal:
+  gateway-token: ${INTERNAL_GATEWAY_TOKEN:}
+
 logging:
   level:
     org.springframework.cloud.gateway: INFO

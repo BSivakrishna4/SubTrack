@@ -1,0 +1,105 @@
+{
+  "id": "e39f37c5-7f1c-4b5a-93be-1a067db8a992",
+  "name": "SubTrack Local Environment",
+  "values": [
+    {
+      "key": "gateway_url",
+      "value": "http://localhost:8080",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "user_name",
+      "value": "SubTrack Test User",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "user_email",
+      "value": "testuser@subtrack.com",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "user_password",
+      "value": "TestPass123!",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "admin_name",
+      "value": "SubTrack Administrator",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@subtrack.com",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "admin_register_email",
+      "value": "newadmin@subtrack.com",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "admin_password",
+      "value": "admin123",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "admin_jwt_token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "expired_jwt_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJleHBpcmVkQHN1YnRyYWNrLmNvbSIsInVzZXJJZCI6OTk5LCJyb2xlIjoiVVNFUiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxNjAwMDAwMDAxfQ.mockExpiredTokenSignatureForTestingOnly",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "user_id",
+      "value": "1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "plan_id",
+      "value": "1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "admin_plan_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "subscription_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "payment_id",
+      "value": "1",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-10-29T12:00:00.000Z",
+  "_postman_exported_using": "Postman/10.24.0"
+}
